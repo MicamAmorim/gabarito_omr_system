@@ -2,6 +2,8 @@
 
 import json
 import tempfile
+import zipfile
+from io import BytesIO
 from pathlib import Path
 
 import pandas as pd
@@ -28,7 +30,7 @@ raw_answers = st.text_area(
     height=120,
 )
 
-def parse_answers(raw: str, n: int):
+def (raw: str, n: int):
     raw = raw.strip().upper().replace(";", ",")
     ans = {}
     if ":" in raw:
@@ -161,6 +163,18 @@ def parse_answers(raw: str, n: int) -> dict[str, str]:
 
     return ans
 
+def zip_folder_to_memory(folder: Path, root_name: str = "debug") -> bytes:
+    buffer = BytesIO()
+
+    with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+        for file_path in sorted(folder.rglob("*")):
+            if file_path.is_file():
+                arcname = Path(root_name) / file_path.relative_to(folder)
+                zip_file.write(file_path, arcname.as_posix())
+
+    buffer.seek(0)
+    return buffer.getvalue()
+
 
 answers = parse_answers(raw_answers, int(num_questions))
 st.write(f"Respostas cadastradas: {len(answers)}")
@@ -249,6 +263,19 @@ if uploaded and st.button("Corrigir"):
         )
 
     debug_dir = out_dir / "debug"
+
+    if debug and debug_dir.exists():
+        debug_files = [p for p in debug_dir.rglob("*") if p.is_file()]
+
+        if debug_files:
+            debug_zip = zip_folder_to_memory(debug_dir, root_name="debug")
+
+            st.download_button(
+                "Baixar ZIP da pasta debug",
+                data=debug_zip,
+                file_name=f"debug_{run_name}.zip",
+                mime="application/zip",
+            )
 
     if debug:
         st.subheader("Imagens de conferência")
