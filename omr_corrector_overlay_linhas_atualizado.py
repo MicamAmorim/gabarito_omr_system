@@ -221,15 +221,15 @@ def detect_layout(
 
     # Regulariza as 20 linhas.
     # Isso evita compressão vertical e melhora as questões 19/20, 39/40, 59/60.
-    if len(row_ys) >= 18:
-        y0 = float(row_ys[0])
-        y1 = float(row_ys[-1])
+    #if len(row_ys) >= 18:comentei aqui
+        #y0 = float(row_ys[0])
+        #y1 = float(row_ys[-1])
 
-        step = (y1 - y0) / max(len(row_ys) - 1, 1)
+        #step = (y1 - y0) / max(len(row_ys) - 1, 1)
 
         # Garante exatamente 20 linhas.
-        y1 = y0 + step * 19
-        row_ys = list(np.linspace(y0, y1, 20))
+        #y1 = y0 + step * 19
+        #row_ys = list(np.linspace(y0, y1, 20))
 
     # Fallback geométrico caso a coluna esquerda falhe.
    
@@ -240,7 +240,7 @@ def detect_layout(
     else:
       row_ys = list(np.linspace(H * 0.552, H * 0.882, 20))
     
-    #if len(row_ys) < 20:
+    #if len(row_ys) < 20: comentei aqui
         #row_ys = list(np.linspace(H * 0.545, H * 0.905, 20))
 
     # ============================================================
