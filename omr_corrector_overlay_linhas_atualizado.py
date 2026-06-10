@@ -232,8 +232,16 @@ def detect_layout(
         row_ys = list(np.linspace(y0, y1, 20))
 
     # Fallback geométrico caso a coluna esquerda falhe.
-    if len(row_ys) < 20:
-        row_ys = list(np.linspace(H * 0.545, H * 0.905, 20))
+   
+    if len(row_ys) >= 18:
+      y0 = float(row_ys[0])
+      step = float(np.median(np.diff(row_ys[:20])))
+      row_ys = [y0 + i * step for i in range(20)]
+    else:
+      row_ys = list(np.linspace(H * 0.552, H * 0.882, 20))
+    
+    #if len(row_ys) < 20:
+        #row_ys = list(np.linspace(H * 0.545, H * 0.905, 20))
 
     # ============================================================
     # 2) DETECÇÃO DOS GRUPOS INFERIORES A-E
