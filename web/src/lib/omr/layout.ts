@@ -1,0 +1,6 @@
+import type { AnswerLetter } from "@/lib/types/domain";
+export const SHEET={width:1240,height:1754} as const; export const MARKER_SIZE=62; export const MARKER_MARGIN=58;
+export const MARKER_CENTERS=[{x:MARKER_MARGIN+MARKER_SIZE/2,y:MARKER_MARGIN+MARKER_SIZE/2},{x:SHEET.width-MARKER_MARGIN-MARKER_SIZE/2,y:MARKER_MARGIN+MARKER_SIZE/2},{x:SHEET.width-MARKER_MARGIN-MARKER_SIZE/2,y:SHEET.height-MARKER_MARGIN-MARKER_SIZE/2},{x:MARKER_MARGIN+MARKER_SIZE/2,y:SHEET.height-MARKER_MARGIN-MARKER_SIZE/2}] as const;
+export const ALL_LETTERS:AnswerLetter[]=["A","B","C","D","E"];
+export interface BubblePoint{question:number;letter:AnswerLetter;x:number;y:number;r:number}
+export function bubbleLayout(questionCount:number,alternatives:AnswerLetter[]=ALL_LETTERS):BubblePoint[]{const cols=questionCount>30?3:questionCount>15?2:1;const rows=Math.ceil(questionCount/cols);const top=355,bottom=185,usableH=SHEET.height-top-bottom,rowStep=Math.min(50,usableH/Math.max(rows,1)),colWidth=340,totalW=colWidth*cols,startX=(SHEET.width-totalW)/2+28;const out:BubblePoint[]=[];for(let q=0;q<questionCount;q++){const col=Math.floor(q/rows),row=q%rows,baseX=startX+col*colWidth,y=top+row*rowStep;alternatives.forEach((letter,i)=>out.push({question:q+1,letter,x:baseX+96+i*43,y,r:13}));}return out;}
