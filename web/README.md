@@ -1,6 +1,14 @@
 # Gabarito Web — V1
 
-Nova versão web/mobile do corretor OMR do repositório `gabarito_omr_system`.
+Versão web/mobile, simples e local-first, do corretor OMR do repositório `gabarito_omr_system`.
+
+## Princípio do app
+
+O app **não exige conta, login, banco de dados ou backend**. Provas, turmas e resultados ficam armazenados no próprio navegador/dispositivo do professor.
+
+Isso mantém o uso simples, gratuito e acessível: o Vercel (ou qualquer hospedagem estática) serve apenas os arquivos do aplicativo; a correção e o armazenamento acontecem no dispositivo.
+
+> Importante: os dados pertencem àquele navegador/dispositivo. Limpar os dados do site ou desinstalar o navegador pode apagar provas, turmas e resultados. Uma função de backup/importação pode ser adicionada depois sem criar contas de usuário.
 
 ## O que já funciona nesta V1
 
@@ -17,7 +25,47 @@ Nova versão web/mobile do corretor OMR do repositório `gabarito_omr_system`.
 - overlay visual de conferência;
 - fluxo de turma: salvar e abrir câmera para o próximo;
 - tabela de resultados e exportação CSV;
-- modo local via `localStorage`, sem backend obrigatório para validar o produto.
+- persistência local em `localStorage`;
+- nenhuma imagem ou resultado precisa ser enviado a um servidor.
+
+## Arquitetura
+
+- Next.js 16 / React 19 / TypeScript;
+- `output: "export"`: build 100% estática, sem Server Functions ou API routes;
+- processamento OMR no cliente usando Canvas;
+- PDF gerado no cliente com `pdf-lib`;
+- QR gerado com `qrcode` e lido com ZXing;
+- dados locais no navegador (`localStorage`).
+
+### Por que o OMR roda no navegador?
+
+No fluxo `foto → corrigir → próximo`, a imagem já está no celular. Processá-la localmente evita upload, reduz latência e custo e permite que o app funcione sem cadastro de usuário ou infraestrutura de banco.
+
+## Desenvolvimento
+
+Requer Node.js >= 20.9.
+
+```bash
+npm install
+npm run build
+npm run dev
+```
+
+Acesse `http://localhost:3000`.
+
+A build gera arquivos estáticos em `out/`.
+
+## Deploy no Vercel
+
+Configure o projeto apontando para:
+
+- repositório: `MicamAmorim/gabarito_omr_system`;
+- branch de teste: `web-app-v1`;
+- **Root Directory:** `web`;
+- framework: Next.js;
+- variáveis de ambiente: **nenhuma**.
+
+O comando de build é `npm run build`. Como a configuração usa `output: "export"`, não há backend da aplicação em produção.
 
 ## Validação sintética
 
@@ -44,35 +92,10 @@ python -m pip install -r validation/requirements.txt
 OMR_CASES=50 python validation/synthetic_omr.py
 ```
 
-## Desenvolvimento
+## Próximos testes
 
-Requer Node.js >= 20.9.
-
-```bash
-npm install
-npm run dev
-```
-
-Acesse `http://localhost:3000`.
-
-## Arquitetura
-
-- Next.js 16 / React 19 / TypeScript;
-- processamento OMR no cliente (Canvas), evitando round-trip por foto;
-- PDF no cliente com `pdf-lib`;
-- QR com `qrcode` e leitura com ZXing;
-- `supabase/schema.sql` contém o blueprint do banco com RLS para a próxima etapa.
-
-### Por que o OMR roda no navegador?
-
-No fluxo `foto → corrigir → próximo`, latência importa mais do que processamento pesado de servidor. O navegador já possui a imagem; usar Canvas evita upload obrigatório e reduz custo/tempo. O backend ficará responsável por persistência, autenticação e sincronização.
-
-## Próxima etapa
-
-1. conectar Supabase/Auth/Storage e substituir o repositório local pela camada remota;
-2. rodar testes com fotos reais em celulares diferentes;
-3. calibrar as zonas de revisão usando os falsos positivos reais;
-4. criar preview no Vercel e testar PWA/câmera em Android/iOS;
-5. após validação, abrir PR da branch web para `main`.
-
-> Observação de segurança (14/10/2026): antes do primeiro deploy público, revisar o patch de segurança do Next.js anunciado para esta data e atualizar a versão fixada assim que a versão corrigida for publicada.
+1. validar a build no Vercel;
+2. imprimir cartões reais;
+3. fotografar em celulares diferentes, com inclinação e iluminação variadas;
+4. calibrar os limiares com falsos positivos/falsos negativos reais;
+5. depois, adicionar backup/restauração local se necessário.
