@@ -1,0 +1,4 @@
+export interface Point{x:number;y:number}
+function solve(A:number[][],b:number[]):number[]{const n=b.length,M=A.map((r,i)=>[...r,b[i]]);for(let i=0;i<n;i++){let p=i;for(let r=i+1;r<n;r++)if(Math.abs(M[r][i])>Math.abs(M[p][i]))p=r;[M[i],M[p]]=[M[p],M[i]];const d=M[i][i];if(Math.abs(d)<1e-10)throw new Error("Homografia degenerada");for(let c=i;c<=n;c++)M[i][c]/=d;for(let r=0;r<n;r++)if(r!==i){const f=M[r][i];for(let c=i;c<=n;c++)M[r][c]-=f*M[i][c];}}return M.map(r=>r[n]);}
+export function homography(src:Point[],dst:Point[]):number[]{const A:number[][]=[],b:number[]=[];for(let i=0;i<4;i++){const{x,y}=src[i],{x:u,y:v}=dst[i];A.push([x,y,1,0,0,0,-u*x,-u*y]);b.push(u);A.push([0,0,0,x,y,1,-v*x,-v*y]);b.push(v);}const h=solve(A,b);return[...h,1];}
+export function project(H:number[],p:Point):Point{const d=H[6]*p.x+H[7]*p.y+H[8];return{x:(H[0]*p.x+H[1]*p.y+H[2])/d,y:(H[3]*p.x+H[4]*p.y+H[5])/d};}
