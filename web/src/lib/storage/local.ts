@@ -12,6 +12,7 @@ export function deleteExam(id:string){const d=load();d.exams=d.exams.filter(x=>x
 export function listClasses(){return load().classes}
 export function getClass(id:string){return load().classes.find(x=>x.id===id)}
 export function upsertClass(c:SchoolClass){const d=load();d.classes=[c,...d.classes.filter(x=>x.id!==c.id)];save(d)}
+export function deleteClass(id:string){const d=load();const klass=d.classes.find(c=>c.id===id);const studentIds=new Set(klass?.students.map(s=>s.id)??[]);d.classes=d.classes.filter(c=>c.id!==id);d.results=d.results.filter(r=>r.classId!==id&&!(r.studentId&&studentIds.has(r.studentId)));d.exams=d.exams.map(e=>{const linked=e.classId===id||e.classIds?.includes(id);if(!linked)return e;const ids=(e.classIds?.length?e.classIds:(e.classId?[e.classId]:[])).filter(x=>x!==id);return{...e,classIds:ids,classId:e.classId===id?undefined:e.classId}});save(d)}
 export function addResult(r:CorrectionResult){const d=load();d.results=[r,...d.results];save(d)}
 export function addResultsBatch(results:CorrectionResult[]){if(!results.length)return;const d=load();d.results=[...results,...d.results];save(d)}
 export function deleteResult(id:string){const d=load();d.results=d.results.filter(x=>x.id!==id);save(d)}
