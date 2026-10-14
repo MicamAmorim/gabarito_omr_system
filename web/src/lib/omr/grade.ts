@@ -1,0 +1,3 @@
+import type { AnswerLetter, CorrectionResult, Exam, QuestionRead } from "@/lib/types/domain";
+export function gradeReads(exam:Exam,reads:QuestionRead[],extra:Partial<CorrectionResult>={}):CorrectionResult{let correct=0,wrong=0,blank=0,double=0,review=0;for(const r of reads){if(r.state==="blank")blank++;else if(r.state==="double")double++;else if(r.state==="review")review++;else if(r.selected.length===1&&r.selected[0]===exam.answerKey[r.question-1])correct++;else wrong++;}const score=Math.round((correct/exam.questions)*exam.maxScore*100)/100;return{id:extra.id??crypto.randomUUID(),examId:exam.id,createdAt:new Date().toISOString(),score,correct,wrong,blank,double,review,reads,...extra};}
+export const letterIndex=(l:AnswerLetter)=>["A","B","C","D","E"].indexOf(l);
