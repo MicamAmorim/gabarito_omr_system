@@ -30,9 +30,10 @@ async function addSheet(pdf:PDFDocument, exam:Exam, student?:Student, klass?:Sch
   page.drawText("Nao recorte os quatro quadrados pretos: eles sao usados para corrigir perspectiva e rotacao.",{x:70,y:43,size:6.8,font});
 }
 
-export async function downloadAnswerSheets(exam:Exam, klass?:SchoolClass){
+export async function downloadAnswerSheets(exam:Exam, classes:SchoolClass[]=[]){
+  if(exam.mode==="student"&&!classes.length){window.alert("Esta prova não possui turma associada neste dispositivo.");return}
   const pdf=await PDFDocument.create();
-  if(exam.mode==="student" && klass){ for(const student of klass.students) await addSheet(pdf,exam,student,klass); }
+  if(exam.mode==="student"){for(const klass of classes)for(const student of klass.students)await addSheet(pdf,exam,student,klass)}
   else await addSheet(pdf,exam);
   const bytes=await pdf.save(); const blob=new Blob([bytes as BlobPart],{type:"application/pdf"}); const url=URL.createObjectURL(blob);
   const a=document.createElement("a"); a.href=url; a.download=`${exam.name.replace(/[^a-z0-9]+/gi,"_")}_cartoes.pdf`; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
