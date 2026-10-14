@@ -101,9 +101,9 @@ def read(im,n=40,alts=5):
     vals=[]
     for q,i,x,y,r in bubbles(n,alts):
         best_mean,best_var,best_cov=0.0,0.0,0.0
-        rr=r*.48
-        for oy in (-4,0,4):
-            for ox in (-4,0,4):
+        rr=r*.52
+        for oy in (-6,-3,0,3,6):
+            for ox in (-6,-3,0,3,6):
                 samples=[]
                 for yy in np.arange(-rr,rr+0.1,2.5):
                     for xx in np.arange(-rr,rr+0.1,2.5):
@@ -123,12 +123,17 @@ def read(im,n=40,alts=5):
     for q in range(1,n+1):
         qv=sorted([v for v in vals if v[0]==q],key=lambda z:z[2],reverse=True); top,second=qv[0][2],qv[1][2]
         selected=[v[1] for v in qv if v[2]>=th]
-        gap=top-second; top_cov=qv[0][4]; second_cov=qv[1][4]; top_var=qv[0][3]
-        if top_cov<.45 and gap<.055 and top<th*.95: state="blank"
-        elif top_cov>.90 and second_cov>.90 and second>=th*.82: state="double"
-        elif top_cov>.82 and top_var<.03 and gap>.075: state="marked"
+        gap=top-second; top_cov=qv[0][4]; second_cov=qv[1][4]
+        blank_limit=max(.38,th*.82); double_limit=max(.62,th*1.02); mark_limit=max(.66,th*1.08)
+        if top<blank_limit and top_cov<.52: state="blank"
+        elif second>=double_limit and second_cov>=.62 and top>=max(.68,th*1.10) and gap<.24: state="double"
+        elif top>=mark_limit and top_cov>=.68 and gap>=.12: state="marked"
         else: state="review"
-        out[q]=(state, selected if selected else ([qv[0][1]] if state!="blank" else []))
+        if state=="blank": chosen=[]
+        elif state=="marked": chosen=[qv[0][1]]
+        elif state=="double": chosen=[qv[0][1],qv[1][1]]
+        else: chosen=selected if selected else [qv[0][1]]
+        out[q]=(state,chosen)
     return out,th
 
 def expected_states(n,rng):
