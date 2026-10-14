@@ -55,8 +55,8 @@ export default function CorrectPage(){
     }
     let graded=gradeReads(exam,out.reads,{...meta,studentId:stu?.id,studentName:stu?.name});
     const full=document.createElement("canvas");drawOverlay(full,canvas,out,exam.answerKey);
-    const scale=Math.min(1,560/Math.max(full.width,full.height));const preview=document.createElement("canvas");preview.width=Math.round(full.width*scale);preview.height=Math.round(full.height*scale);preview.getContext("2d")!.drawImage(full,0,0,preview.width,preview.height);
-    graded={...graded,imageDataUrl:preview.toDataURL("image/jpeg",.62)};
+    const scale=Math.min(1,1200/Math.max(full.width,full.height));const preview=document.createElement("canvas");preview.width=Math.round(full.width*scale);preview.height=Math.round(full.height*scale);preview.getContext("2d")!.drawImage(full,0,0,preview.width,preview.height);
+    graded={...graded,imageDataUrl:preview.toDataURL("image/jpeg",.84)};
     return {graded,stu,qr};
   }
 
@@ -65,7 +65,7 @@ export default function CorrectPage(){
   async function processPdf(file:File){
     if(!exam)return;setBusy(true);setError("");setResult(undefined);setStudent(undefined);setQrText("");setBatchResults([]);setBatchFailures([]);
     try{
-      const pages=await renderPdfPages(file,1800);
+      const pages=await renderPdfPages(file,2200);
       if(!pages.length)throw new Error("O PDF não possui páginas para corrigir.");
       if(pages.length===1){setPdfProgress({current:1,total:1});const{graded,stu,qr}=await gradeCanvas(pages[0].canvas,{sourceName:file.name,sourcePage:1,batchSize:1});setStudent(stu);setQrText(qr);setResult(graded);return}
       const batchId=crypto.randomUUID();const done:CorrectionResult[]=[];const failures:string[]=[];
